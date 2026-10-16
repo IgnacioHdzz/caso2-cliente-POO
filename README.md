@@ -8,7 +8,7 @@ Cliente de *Jungle Attack*: la aplicación gráfica que usa cada jugador. Se con
 
 Pantallas: sala de espera (nickname, crear o unirse a una partida), esperando rival, selección de especie, juego y resumen final.
 
-> **Estado:** especificación de diseño (spec). Puede ajustarse durante la implementación.
+> **Estado:** especificación de diseño (spec).
 
 ## Diagrama de clases
 
@@ -258,15 +258,10 @@ Además, cada tipo de mensaje del servidor tiene su propio procesador (`IProcesa
 
 ### Herencia, interfaces y polimorfismo
 
-- **`ElementoVisible` → `AnimalVista`, `TazaVista`, `BanderaVista`:** polimorfismo en `aceptar()`; cada elemento llama al método del visitante que le corresponde.
-- **`PantallaBase` → 5 pantallas:** todas observan el modelo; polimorfismo en `actualizar()`.
+- **`ElementoVisible` → `AnimalVista`, `TazaVista`, `BanderaVista`:** polimorfismo en `aceptar()` cada elemento llama al método del visitante que le corresponde.
+- **`PantallaBase` → 5 pantallas:** todas observan el modelo, hay polimorfismo en `actualizar()`.
 - **`IProcesadorMensaje` → 7 procesadores:** polimorfismo en `procesar()`.
 - **Herencia de clases de Java:** `PantallaBase` extiende `JPanel`, `VentanaPrincipal` extiende `JFrame`, `ControladorMouse` extiende `MouseAdapter` y `HiloReceptor` implementa `Runnable`.
-
-### Uso de `static`
-
-- Las constantes de `Constantes`, el `main` y la instancia única de `CacheImagenes` (con su `getInstancia()`).
-- El modelo, el controlador y la conexión son objetos creados en `MainCliente` y pasados a quien los necesita.
 
 ### Hilos
 
