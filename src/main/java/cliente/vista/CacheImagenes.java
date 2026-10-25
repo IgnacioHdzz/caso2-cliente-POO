@@ -14,11 +14,10 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import cliente.constantes.Constantes;
 import comun.modelo.Especie;
 
-// Singleton que convierte los SVG una sola vez y reutiliza sus imagenes.
+// Singleton que rasteriza los SVG y reutiliza sus imagenes.
 public class CacheImagenes {
 
     private static final CacheImagenes INSTANCIA = new CacheImagenes();
-
     private final Map<String, BufferedImage> imagenes;
 
     private CacheImagenes() {
@@ -29,7 +28,6 @@ public class CacheImagenes {
         return INSTANCIA;
     }
 
-    // Carga los recursos disponibles; los SVG que faltan se incorporaran despues.
     public void cargarTodas() {
         for (Especie especie : Especie.values()) {
             String nombre = especie.name().toLowerCase(Locale.ROOT);
@@ -53,25 +51,31 @@ public class CacheImagenes {
     private BufferedImage rasterizar(String pNombre, int pTamanio) {
         URL recurso = CacheImagenes.class.getResource(
                 Constantes.CARPETA_IMAGENES + pNombre + Constantes.EXTENSION_IMAGEN);
-        if (recurso == null) {
+        if (recurso == null || pTamanio <= 0) {
             return null;
         }
         SVGDocument documento = new SVGLoader().load(recurso);
         if (documento == null) {
             return null;
         }
+        float ancho = documento.size().width;
+        float alto = documento.size().height;
+        if (ancho <= 0 || alto <= 0) {
+            return null;
+        }
+
         BufferedImage imagen = new BufferedImage(pTamanio, pTamanio, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graficos = imagen.createGraphics();
         try {
             graficos.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            // Ajusta el SVG al tamaño de la imagen sin depender de ViewBox.
-            float ancho = documento.size().width;
-            float alto = documento.size().height;
-            if (ancho <= 0 || alto <= 0) {
-                return null;
-            }
-            graficos.scale(pTamanio / (double) ancho, pTamanio / (double) alto);
+            // Usa una escala uniforme para no deformar los SVG rectangulares.
+            double escala = Math.min(pTamanio / (double) ancho, pTamanio / (double) alto);
+            // Centra el dibujo y conserva los margenes transparentes.
+            double margenX = (pTamanio - ancho * escala) / 2.0;
+            double margenY = (pTamanio - alto * escala) / 2.0;
+            graficos.translate(margenX, margenY);
+            graficos.scale(escala, escala);
             documento.render(null, graficos);
         } finally {
             graficos.dispose();
