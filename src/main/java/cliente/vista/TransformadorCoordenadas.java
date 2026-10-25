@@ -29,6 +29,12 @@ public class TransformadorCoordenadas {
         return (int) Math.round(pTamanio * pAnchoPanel / pZona.getAncho());
     }
 
+    // Usa la misma escala de posiciones para tamaños de animales y objetos.
+    public int escalar(double pTamanio, Zona pZona, int pAnchoPanel, int pAltoPanel) {
+        double escala = calcularEscala(pZona, pAnchoPanel, pAltoPanel);
+        return (int) Math.round(pTamanio * escala);
+    }
+
     private double calcularEscala(Zona pZona, int pAnchoPanel, int pAltoPanel) {
         if (pZona.getAncho() <= 0 || pZona.getAlto() <= 0
                 || pAnchoPanel <= 0 || pAltoPanel <= 0) {
