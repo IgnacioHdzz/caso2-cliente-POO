@@ -1,6 +1,8 @@
 package cliente.vista;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Locale;
@@ -93,6 +95,16 @@ public class RenderizadorElementos implements IVisitanteElemento {
         int anchoCamino = Math.max(13, Math.min(29, Math.min(w, h) / 22));
         dibujarCaminos(terreno, caminos, anchoCamino);
 
+        // Crear puntos decorativos fijos por zona, respetando los caminos reales.
+        List<Line2D.Double> tramos = new ArrayList<>();
+        for (Camino camino : caminos) {
+            Point a = transformador.aPantalla(camino.getInicio(), zona, anchoPanel, altoPanel);
+            Point b = transformador.aPantalla(camino.getFin(), zona, anchoPanel, altoPanel);
+            tramos.add(new Line2D.Double(a.x, a.y, b.x, b.y));
+        }
+        DecoracionesCostaRica decoraciones =
+                new DecoracionesCostaRica(zona.getId(), w, h, tramos);
+
         // Arboles, arbustos y piedras son puramente decorativos.
         // Nunca tapan los caminos ni alteran las coordenadas de los clics.
         int arboles = Math.max(24, w * h / 13500);
@@ -100,7 +112,8 @@ public class RenderizadorElementos implements IVisitanteElemento {
             int x = 23 + azar.nextInt(Math.max(1, w - 46));
             int y = 23 + azar.nextInt(Math.max(1, h - 46));
             int radio = 10 + azar.nextInt(12);
-            if (libreDeCaminos(x, y, caminos, radio + anchoCamino)) {
+            if (libreDeCaminos(x, y, caminos, radio + anchoCamino)
+                    && decoraciones.espacioLibre(x, y, radio)) {
                 dibujarArbol(terreno, x, y, radio, azar);
             }
         }
@@ -109,7 +122,8 @@ public class RenderizadorElementos implements IVisitanteElemento {
         for (int i = 0; i < arbustos; i++) {
             int x = 12 + azar.nextInt(Math.max(1, w - 24));
             int y = 12 + azar.nextInt(Math.max(1, h - 24));
-            if (libreDeCaminos(x, y, caminos, anchoCamino + 9)) {
+            if (libreDeCaminos(x, y, caminos, anchoCamino + 9)
+                    && decoraciones.espacioLibre(x, y, 10)) {
                 dibujarArbusto(terreno, x, y, 5 + azar.nextInt(5));
             }
         }
@@ -117,7 +131,8 @@ public class RenderizadorElementos implements IVisitanteElemento {
         for (int i = 0; i < Math.max(20, w * h / 18000); i++) {
             int x = 10 + azar.nextInt(Math.max(1, w - 20));
             int y = 10 + azar.nextInt(Math.max(1, h - 20));
-            if (libreDeCaminos(x, y, caminos, anchoCamino / 2 + 5)) {
+            if (libreDeCaminos(x, y, caminos, anchoCamino / 2 + 5)
+                    && decoraciones.espacioLibre(x, y, 8)) {
                 int r = 2 + azar.nextInt(4);
                 terreno.setColor(new Color(19, 50, 32, 95));
                 terreno.fillOval(x - r + 2, y - r + 2, r * 2, r + 3);
@@ -127,6 +142,10 @@ public class RenderizadorElementos implements IVisitanteElemento {
                 terreno.drawArc(x - r, y - r, r * 2, r * 2, 45, 100);
             }
         }
+
+        // Carretas tipicas, estadio, cafetales y cataratas sobre la selva.
+        // Todo permanece debajo de los animales, tazas y banderas.
+        decoraciones.dibujar(terreno);
 
         // Un marco discreto delimita visualmente la zona sin crear obstaculos.
         terreno.setColor(new Color(10, 35, 22, 120));
