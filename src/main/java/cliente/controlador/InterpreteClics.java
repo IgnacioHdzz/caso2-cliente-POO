@@ -1,12 +1,15 @@
 package cliente.controlador;
 
 import comun.modelo.Posicion;
+import cliente.constantes.Constantes;
+import cliente.modelo.AnimalVista;
 import cliente.modelo.ModeloJuego;
+import cliente.modelo.Seleccion;
 
 /**
- * Decide qué significa cada clic (lógica del cliente, sin ventana: se puede probar).
- * Izquierdo: seleccionar o quitar animales propios; en el vacío, quitar toda la selección.
- * Derecho: sobre un enemigo, atacar; en el vacío, mover los seleccionados.
+ * Decide qué significa cada clic.
+ * Izquierdo: seleccionar o quitar animales propios. Si se hace clic en el vacío, quita toda la selección.
+ * Derecho: sobre un enemigo, ataca y en el vacío mueve los seleccionados.
  */
 public class InterpreteClics {
 
@@ -19,12 +22,30 @@ public class InterpreteClics {
     }
 
     public void clicIzquierdo(Posicion pPunto) {
-        // TODO (Ignacio): buscar el animal bajo el punto (RADIO_CLIC).
-        // Propio: alternar en la selección. Vacío: limpiar la selección. Ajeno: nada. Notificar.
+        AnimalVista animal = modelo.getEstadoJuego().buscarAnimalEn(pPunto, Constantes.RADIO_CLIC);
+        Seleccion seleccion = modelo.getSeleccion();
+        if (animal == null) {
+            seleccion.limpiar();
+            modelo.notificarObservadores();
+            return;
+        }
+        if (modelo.esPropio(animal)) {
+            seleccion.alternar(animal.getId());
+            modelo.notificarObservadores();
+        }
     }
 
     public void clicDerecho(Posicion pPunto) {
-        // TODO (Ignacio): si no hay selección, nada. Animal ajeno bajo el punto: atacar.
-        // Vacío: mover los seleccionados. Propio: nada.
+        if (modelo.getSeleccion().estaVacia()) {
+            return;
+        }
+        AnimalVista animal = modelo.getEstadoJuego().buscarAnimalEn(pPunto, Constantes.RADIO_CLIC);
+        if (animal == null) {
+            controlador.moverSeleccionados(pPunto);
+            return;
+        }
+        if (!modelo.esPropio(animal)) {
+            controlador.atacar(animal.getId());
+        }
     }
 }
