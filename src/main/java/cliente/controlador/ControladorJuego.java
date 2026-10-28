@@ -3,6 +3,8 @@ package cliente.controlador;
 import java.io.IOException;
 import comun.modelo.Especie;
 import comun.modelo.Posicion;
+import comun.modelo.MapaBase;
+import comun.modelo.Zona;
 import comun.protocolo.Mensaje;
 import comun.protocolo.TipoMensaje;
 import comun.protocolo.datos.DatosAtacar;
@@ -74,6 +76,19 @@ public class ControladorJuego {
         }
         enviar(TipoMensaje.MOVE_ANIMALS,
                 new DatosMoverAnimales(seleccion.getIds(), pDestino.getX(), pDestino.getY()));
+    }
+
+    /** Mueve los seleccionados al centro de otra zona; el servidor calcula el camino con Dijkstra. */
+    public void moverAZona(int pIdZona) {
+        MapaBase mapa = modelo.getMapa();
+        if (mapa == null) {
+            return;
+        }
+        Zona zona = mapa.getZona(pIdZona);
+        if (zona == null) {
+            return;
+        }
+        moverSeleccionados(zona.getCentro());
     }
 
     public void atacar(int pIdObjetivo) {
