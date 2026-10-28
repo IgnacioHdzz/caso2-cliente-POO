@@ -34,7 +34,7 @@ public class RenderizadorElementos implements IVisitanteElemento {
         g.setColor(Constantes.COLOR_FONDO_ZONA);
         g.fillRect(0, 0, anchoPanel, altoPanel);
         g.setColor(Constantes.COLOR_CAMINO);
-        g.setStroke(new BasicStroke(7, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.setStroke(new BasicStroke(14, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         for (Camino camino : modelo.getMapa().getCaminosDe(zona.getId())) {
             Point inicio = transformador.aPantalla(camino.getInicio(), zona, anchoPanel, altoPanel);
             Point fin = transformador.aPantalla(camino.getFin(), zona, anchoPanel, altoPanel);
